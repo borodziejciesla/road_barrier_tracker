@@ -42,6 +42,8 @@ namespace se {
         cartesian_point.covariance(0u, 0u) = std::pow(c * radar_detection.range_std, 2) + std::pow(s * radar_detection.range * radar_detection.azimuth_std, 2);
         cartesian_point.covariance(0u, 1u) = cartesian_point.covariance(1u, 0u) = c * s * (std::pow(radar_detection.range_std, 2) + std::pow(radar_detection.range * radar_detection.azimuth_std, 2));
         cartesian_point.covariance(1u, 1u) = std::pow(s * radar_detection.range_std, 2) + std::pow(c * radar_detection.range * radar_detection.azimuth_std, 2);
+
+        return cartesian_point;
       }
     );
   }
