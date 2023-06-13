@@ -3,7 +3,7 @@
 
 namespace se {
   struct Calibrations {
-    //
+    float lambda = 0.9f;  // [-] Barrier shrinking factor
   };
 } //  namespace se
 

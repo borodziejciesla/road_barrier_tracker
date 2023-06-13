@@ -5,7 +5,12 @@
 
 namespace se {
   BarrierTracker::BarrierTracker(const Calibrations & calibrations)
-    : calibrations_{calibrations} {}
+    : calibrations_{calibrations} {
+    // Set transition Matrix
+    transition_matrix_ = Eigen::Matrix<float, state_size, state_size>::Identity();
+    transition_matrix_(state_size - 1u, state_size - 1u) = transition_matrix_(state_size, state_size) = 1.0f - calibrations_.lambda;
+    transition_matrix_(state_size - 1u, state_size) = transition_matrix_(state_size, state_size - 1u) = calibrations_.lambda;
+  }
 
   void BarrierTracker::Run(const RadarScan & radar_scan) {
     // Convert detections

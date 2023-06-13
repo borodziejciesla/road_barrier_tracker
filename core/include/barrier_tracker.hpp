@@ -24,11 +24,14 @@ namespace se {
         Eigen::Matrix2f covariance;
       };
 
+      static constexpr uint8_t state_size = 6u;
+
       void ConvertDetectionsToCartesianPoints(const RadarScan & radar_scan);      
 
       Barriers output_barriers_;
       Calibrations calibrations_;
       std::vector<CartesianPoint> points_cartesian_;
+      Eigen::Matrix<float, state_size, state_size> transition_matrix_;
   };
 } //  namespace se
 

@@ -20,5 +20,8 @@
                 }
             }
         ]
+    },
+    "files.associations": {
+        "*.tcc": "cpp"
     }
 }
