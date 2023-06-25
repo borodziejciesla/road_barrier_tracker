@@ -19,10 +19,10 @@ namespace se {
     MakePrediction();
     // Association
     MakeGating();
-     // Associate
+    MakeAssociation();
     // Correction Step
-    // TODO
-    // COnvert to output
+    MakeCorrectionStep();
+    // Convert to output structure
     ConvertBarriersToOutput();
   }
 
@@ -66,7 +66,7 @@ namespace se {
   void BarrierTracker::MakePrediction(void) {
     predicted_barriers_.clear();
     std::transform(barriers_.begin(), barriers_.end(), 
-      std::back_inserter(predicted_barriers_), 
+      barriers_.begin(), 
       [this](const InternalBarrier barrier) {
         InternalBarrier predicted;
 
@@ -82,6 +82,26 @@ namespace se {
     for (const auto barrier : barriers_) {
       for (auto det_index = 0; det_index < points_cartesian_.size(); det_index++) {
         //
+      }
+    }
+  }
+
+  void BarrierTracker::MakeAssociation(void) {
+    //
+  }
+
+  void BarrierTracker::MakeCorrectionStep(void) {
+    for (auto barrier_index = 0u; barrier_index < barriers_.size(); barrier_index++ ) {
+      for (const auto detection_index : associations_.at(barrier_index)) {
+        // Find observation matrix
+        SetObservationMatrix(points_cartesian_.at(detection_index).point(0u));
+        // Make step
+        const auto innovation = points_cartesian_.at(detection_index).point(1u) - observation_matrix_ * barriers_.at(barrier_index).state.head<4u>();
+        const auto innovation_covariance = observation_matrix_ * barriers_.at(barrier_index).covariance.block<4u, 4u>(0u, 0u) * observation_matrix_.transpose() + points_cartesian_.at(detection_index).covariance(1u, 1u);
+        const auto kalman_gain = barriers_.at(barrier_index).covariance.block<4u, 4u>(0u, 0u) * observation_matrix_.transpose() / innovation_covariance;
+        // Set estimation
+        barriers_.at(barrier_index).state.head<4u>() += kalman_gain * innovation;
+        barriers_.at(barrier_index).covariance.block<4u, 4u>(0u, 0u) = (Eigen::Matrix4f::Identity() - kalman_gain * observation_matrix_) * barriers_.at(barrier_index).covariance.block<4u, 4u>(0u, 0u);
       }
     }
   }
