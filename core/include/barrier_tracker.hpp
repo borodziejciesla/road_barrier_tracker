@@ -35,6 +35,8 @@ namespace se {
       void SetObservationMatrix(const float x);
       void MakePrediction(void);
       void MakeGating(void);
+      void ConvertBarriersToOutput(void);
+      Barrier ConvertBarrierToOutput(const InternalBarrier barrier);
 
       Barriers output_barriers_;
       Calibrations calibrations_;

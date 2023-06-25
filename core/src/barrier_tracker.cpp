@@ -23,7 +23,7 @@ namespace se {
     // Correction Step
     // TODO
     // COnvert to output
-    // TODO
+    ConvertBarriersToOutput();
   }
 
   const Barriers & BarrierTracker::GetBarriers(void) const {
@@ -84,5 +84,32 @@ namespace se {
         //
       }
     }
+  }
+
+  void BarrierTracker::ConvertBarriersToOutput(void) {
+    // TODO: Set timestamo
+    // Convert barriers
+    output_barriers_.barriers.clear();
+    std::transform(barriers_.begin(), barriers_.end(),
+      std::back_inserter(output_barriers_.barriers),
+      [this](const BarrierTracker::InternalBarrier barrier) {
+        return ConvertBarrierToOutput(barrier);
+      }
+    );
+  }
+
+  Barrier BarrierTracker::ConvertBarrierToOutput(const BarrierTracker::InternalBarrier barrier) {
+    Barrier output_barrier;
+
+    output_barrier.a0 = barrier.state(0u);
+    output_barrier.a0_std = std::sqrt(barrier.covariance(0u, 0u));
+    output_barrier.a1 = barrier.state(1u);
+    output_barrier.a1_std = std::sqrt(barrier.covariance(1u, 1u));
+    output_barrier.a2 = barrier.state(2u);
+    output_barrier.a2_std = std::sqrt(barrier.covariance(2u, 2u));
+    output_barrier.a3 = barrier.state(3u);
+    output_barrier.a3_std = std::sqrt(barrier.covariance(3u, 3u));
+
+    return output_barrier;
   }
 } //  namespace se
