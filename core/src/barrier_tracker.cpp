@@ -64,7 +64,6 @@ namespace se {
   }
 
   void BarrierTracker::MakePrediction(void) {
-    predicted_barriers_.clear();
     std::transform(barriers_.begin(), barriers_.end(), 
       barriers_.begin(), 
       [this](const InternalBarrier barrier) {
@@ -79,10 +78,30 @@ namespace se {
   }
 
   void BarrierTracker::MakeGating(void) {
+    // Clear gates
+    gates_.clear();
+    // Find detections in gates
+    std::vector<uint8_t> barrier_gate;
     for (const auto barrier : barriers_) {
       for (auto det_index = 0; det_index < points_cartesian_.size(); det_index++) {
-        //
+        const auto x = points_cartesian_.at(det_index).point(0u);
+        const auto y = points_cartesian_.at(det_index).point(1u);
+        const auto cov_y = points_cartesian_.at(det_index).covariance(1u, 1u);
+
+        if (((x - barrier.state(5u)) > -calibrations_.delta_start) && ((barrier.state(6u) - x) > -calibrations_.delta_end)) {
+          // In range gate - calculate distance
+          const auto innovation = y - barrier.state(1u);
+          SetObservationMatrix(x);
+          const auto s = observation_matrix_ * barrier.covariance.block<4u, 4u>(0u, 0u) * observation_matrix_.transpose() + cov_y;
+          // Calculate distance
+          const auto distance = std::pow(innovation, 2u) / s;
+          // Check if in gate
+          if (distance <= calibrations_.gate)
+            barrier_gate.push_back(det_index);
+        }
       }
+      // Set detections in gate for barrier
+      gates_.push_back(barrier_gate);
     }
   }
 

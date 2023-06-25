@@ -47,7 +47,6 @@ namespace se {
       Eigen::Matrix<float, 1u, state_size - 2u> observation_matrix_;
       std::vector<std::vector<uint8_t>> gates_;
       std::vector<InternalBarrier> barriers_;
-      std::vector<InternalBarrier> predicted_barriers_;
       std::vector<std::vector<uint8_t>> associations_;
   };
 } //  namespace se
