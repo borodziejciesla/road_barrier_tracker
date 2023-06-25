@@ -15,6 +15,15 @@ namespace se {
   void BarrierTracker::Run(const RadarScan & radar_scan) {
     // Convert detections
     ConvertDetectionsToCartesianPoints(radar_scan);
+    // Prediction Step
+    MakePrediction();
+    // Association
+    MakeGating();
+     // Associate
+    // Correction Step
+    // TODO
+    // COnvert to output
+    // TODO
   }
 
   const Barriers & BarrierTracker::GetBarriers(void) const {
@@ -46,5 +55,34 @@ namespace se {
         return cartesian_point;
       }
     );
+  }
+
+  void BarrierTracker::SetObservationMatrix(const float x) {
+    observation_matrix_(0u, 0u) = 1.0f;
+    for (auto index = 1u; index < state_size -2u; index++)
+      observation_matrix_(0u, index) = std::pow(x, index);
+  }
+
+  void BarrierTracker::MakePrediction(void) {
+    predicted_barriers_.clear();
+    std::transform(barriers_.begin(), barriers_.end(), 
+      std::back_inserter(predicted_barriers_), 
+      [this](const InternalBarrier barrier) {
+        InternalBarrier predicted;
+
+        predicted.state = transition_matrix_ * barrier.state;
+        predicted.covariance = transition_matrix_ * barrier.covariance * transition_matrix_.transpose(); // TODO: Add Q
+
+        return predicted;
+      }
+    );
+  }
+
+  void BarrierTracker::MakeGating(void) {
+    for (const auto barrier : barriers_) {
+      for (auto det_index = 0; det_index < points_cartesian_.size(); det_index++) {
+        //
+      }
+    }
   }
 } //  namespace se
